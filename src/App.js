@@ -1,21 +1,49 @@
 import React, { useState } from 'react';
 import Nav from './components/Nav'
-import { Pane, Position, SideSheet, IconButton, Card, Heading, TextInput, Textarea } from 'evergreen-ui'
+import {
+  Pane,
+  Position,
+  SideSheet,
+  IconButton,
+  Card,
+  Heading,
+  TextInput,
+  Textarea,
+  Paragraph
+}
+  from 'evergreen-ui'
 import CardContainer from './components/CardContainer';
 
 
 function App() {
   const [isShown, setIsShown] = useState(false)
+  const [title, setTitle] = useState('')
+  const [textarea, setTextarea] = useState('')
+
+  const onTextInputChange = event => {
+    setTitle(event.target.value)
+  }
+
+  const onTextAreaChange = event => {
+    setTextarea(event.target.value)
+  }
 
 
 
   return (
     <Pane>
       <Nav />
-      <CardContainer marginLeft={120} marginRight={120} marginTop={40}>
+      <CardContainer
+        marginLeft={120}
+        marginRight={120}
+        marginTop={40}
+        display="flex"
+      >
         <SideSheet
           isShown={isShown}
-          onCloseComplete={() => setIsShown(false)}
+          onCloseComplete={() => {
+            setIsShown(false)
+          }}
           position={Position.Right}
           width={400}
         >
@@ -26,6 +54,7 @@ function App() {
                 placeholder="Title"
                 height={40}
                 width="100%"
+                onChange={onTextInputChange}
               />
             </Pane>
           </Pane>
@@ -44,6 +73,7 @@ function App() {
                 placeholder="Start Writing.."
                 height="100%"
                 width="100%"
+                onChange={onTextAreaChange}
               />
             </Card>
           </Pane>
@@ -63,8 +93,22 @@ function App() {
           justifyContent="center"
           border="default"
         />
+        <Card
+          marginLeft={10}
+          marginRight={10}
+          marginBottom={10}
+          height={300}
+          width={150}
+          elevation={4}
+          borderRadius={20}
+          border="default"
+          overflow="hidden"
+        >
+          <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>{title}</Heading>
+          <hr></hr>
+        <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>{textarea}</Paragraph>
+        </Card>
       </CardContainer>
-
     </Pane>
   )
 }
