@@ -9,27 +9,57 @@ import {
   Heading,
   TextInput,
   Textarea,
-  Paragraph
+  Paragraph,
+  Button
 }
   from 'evergreen-ui'
 import CardContainer from './components/CardContainer';
 
+const NoteCard = props => {
+
+  return (
+    <Card
+          marginLeft={10}
+          marginRight={10}
+          marginBottom={10}
+          height={300}
+          width={150}
+          elevation={4}
+          borderRadius={20}
+          border="default"
+          overflow="hidden"
+        >
+          <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>Title</Heading>
+          <hr></hr>
+          <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>Note</Paragraph>
+        </Card>
+  )
+}
+
+
 
 function App() {
   const [isShown, setIsShown] = useState(false)
-  const [title, setTitle] = useState('')
-  const [textarea, setTextarea] = useState('')
+  const [notes, setNotes] = useState({title: '', note: ''})
+  const [component, setComponent] = useState([])
+  
 
-  const onTextInputChange = event => {
-    setTitle(event.target.value)
+const onNoteChange = (event) => {
+  const {name, value} = event.target
+  if (name === 'text-input-name') {
+    setNotes({...notes, ...{title: value}})
+  } 
+  else if (name === 'textarea-1') {
+    setNotes({...notes, ...{note:value}})
   }
+}
+ 
+let noteList = []
 
-  const onTextAreaChange = event => {
-    setTextarea(event.target.value)
-  }
-
-
-
+const createCard = () => {
+ const newComponents = [...component, NoteCard]
+ setComponent(newComponents)
+}
   return (
     <Pane>
       <Nav />
@@ -43,6 +73,8 @@ function App() {
           isShown={isShown}
           onCloseComplete={() => {
             setIsShown(false)
+            createCard()
+           
           }}
           position={Position.Right}
           width={400}
@@ -54,7 +86,7 @@ function App() {
                 placeholder="Title"
                 height={40}
                 width="100%"
-                onChange={onTextInputChange}
+                onChange={onNoteChange}
               />
             </Pane>
           </Pane>
@@ -73,7 +105,7 @@ function App() {
                 placeholder="Start Writing.."
                 height="100%"
                 width="100%"
-                onChange={onTextAreaChange}
+                onChange={onNoteChange}
               />
             </Card>
           </Pane>
@@ -93,21 +125,7 @@ function App() {
           justifyContent="center"
           border="default"
         />
-        <Card
-          marginLeft={10}
-          marginRight={10}
-          marginBottom={10}
-          height={300}
-          width={150}
-          elevation={4}
-          borderRadius={20}
-          border="default"
-          overflow="hidden"
-        >
-          <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>{title}</Heading>
-          <hr></hr>
-        <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>{textarea}</Paragraph>
-        </Card>
+        {component.map((NoteCard, i) => <NoteCard key={i} title={notes.title} note={notes.note}/>)}
       </CardContainer>
     </Pane>
   )
