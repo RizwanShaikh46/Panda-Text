@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Nav from './components/Nav'
 import {
   Pane,
@@ -10,56 +10,100 @@ import {
   TextInput,
   Textarea,
   Paragraph,
-  Button
+  Button,
+  Dialog
 }
   from 'evergreen-ui'
 import CardContainer from './components/CardContainer';
 
 const NoteCard = props => {
+    const [isShown, setIsShown] = useState(false)
 
   return (
-    <Card
-          marginLeft={10}
-          marginRight={10}
-          marginBottom={10}
-          height={300}
-          width={150}
-          elevation={4}
-          borderRadius={20}
-          border="default"
-          overflow="hidden"
+      <Card
+        onClick={(event) =>{ 
+          if(event.target === event.currentTarget)  
+          setIsShown(true)
+        }}
+        marginLeft={10}
+        marginRight={10}
+        marginBottom={10}
+        height={300}
+        width={150}
+        elevation={4}
+        borderRadius={20}
+        border="default"
+        overflow="hidden"
+      >
+        <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>{props.title}</Heading>
+        <hr></hr>
+        <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>{props.note}</Paragraph>
+        <Button onClick={props.onDelete}>Delete</Button>
+
+        <Dialog
+          isShown={isShown}
+          onCloseComplete={() => setIsShown(false)}
+          hasHeader={false}
+          hasFooter={false}
         >
-          <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>Title</Heading>
-          <hr></hr>
-          <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>Note</Paragraph>
-        </Card>
+          <Pane height={1800} width="100%" >
+          <TextInput 
+          height={40}
+          width="100%"
+          name="text-input-name"
+          marginBottom={10}
+          />
+          <Textarea
+          width="100%"
+          height="100%"
+          name="textarea-1"
+          /> 
+          </Pane>
+        </Dialog>
+      </Card>
+    
   )
 }
 
-
-
 function App() {
   const [isShown, setIsShown] = useState(false)
-  const [notes, setNotes] = useState({title: '', note: ''})
+  const [notes, setNotes] = useState({ title: '', note: '' })
   const [component, setComponent] = useState([])
-  
+  const [inputNotes, setInputNotes] = useState([])
 
-const onNoteChange = (event) => {
-  const {name, value} = event.target
-  if (name === 'text-input-name') {
-    setNotes({...notes, ...{title: value}})
-  } 
-  else if (name === 'textarea-1') {
-    setNotes({...notes, ...{note:value}})
+  const onDelete = (event, id) => {
+    if (event.target === event.currentTarget) {
+      const newArr = inputNotes.filter(item => item.id !== id)
+      setInputNotes(newArr)
+      console.log(inputNotes)
+    }
   }
-}
- 
-let noteList = []
 
-const createCard = () => {
- const newComponents = [...component, NoteCard]
- setComponent(newComponents)
-}
+
+  const prevInput = useRef()
+  useEffect(() => {
+    prevInput.current = inputNotes
+  })
+
+  const onNoteChange = (event) => {
+    const { name, value } = event.target
+    if (name === 'text-input-name') {
+      setNotes({ ...notes, ...{ title: value } })
+    }
+    else if (name === 'textarea-1') {
+      setNotes({ ...notes, ...{ note: value } })
+    }
+  }
+
+
+  const createCard = () => {
+    if ((notes.title !== '' || notes.note !== '')) {
+      inputNotes.push({ id: Math.random(), title: notes.title, note: notes.note })
+    }
+    const newComponents = [...component, NoteCard]
+    setComponent(newComponents)
+
+  }
   return (
     <Pane>
       <Nav />
@@ -74,7 +118,7 @@ const createCard = () => {
           onCloseComplete={() => {
             setIsShown(false)
             createCard()
-           
+
           }}
           position={Position.Right}
           width={400}
@@ -87,6 +131,7 @@ const createCard = () => {
                 height={40}
                 width="100%"
                 onChange={onNoteChange}
+                value={notes.title}
               />
             </Pane>
           </Pane>
@@ -106,6 +151,7 @@ const createCard = () => {
                 height="100%"
                 width="100%"
                 onChange={onNoteChange}
+                value={notes.note}
               />
             </Card>
           </Pane>
@@ -125,7 +171,21 @@ const createCard = () => {
           justifyContent="center"
           border="default"
         />
-        {component.map((NoteCard, i) => <NoteCard key={i} title={notes.title} note={notes.note}/>)}
+        {component.map((NoteCard, i) => {
+          if (inputNotes[i] && (inputNotes[i].title !== '' || inputNotes[i].note !== '') &&
+            (inputNotes[i].title !== 'undefined' || inputNotes[i].note !== 'undefined')
+          ) {
+            return (<NoteCard
+              key={i}
+              title={inputNotes[i].title}
+              note={inputNotes[i].note}
+              onDelete={(event) => onDelete(event, inputNotes[i].id)}
+              onNoteChange={onNoteChange}
+            />)
+          }
+        }
+        )}
+
       </CardContainer>
     </Pane>
   )
