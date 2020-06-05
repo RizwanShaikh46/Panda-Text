@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createRef } from 'react';
 import Nav from './components/Nav'
 import {
   Pane,
@@ -16,14 +16,24 @@ import {
   from 'evergreen-ui'
 import CardContainer from './components/CardContainer';
 
-const NoteCard = props => {
-    const [isShown, setIsShown] = useState(false)
+class NoteCard extends React.Component {
+    constructor(props) {
+      super(props)
+      this.state = {
+        isShown : false
+      }
+    }
 
+     editInputNotes = (id) => {
+      console.log(id)
+    }
+   
+render(){
   return (
       <Card
         onClick={(event) =>{ 
           if(event.target === event.currentTarget)  
-          setIsShown(true)
+          this.setState({isShown: true})
         }}
         marginLeft={10}
         marginRight={10}
@@ -35,14 +45,17 @@ const NoteCard = props => {
         border="default"
         overflow="hidden"
       >
-        <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>{props.title}</Heading>
+        <Heading wordWrap="break-word" marginLeft={10} marginTop={5}>{this.props.title}</Heading>
         <hr></hr>
-        <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>{props.note}</Paragraph>
-        <Button onClick={props.onDelete}>Delete</Button>
+        <Paragraph wordWrap="break-word" marginLeft={10} marginTop={5}>{this.props.note}</Paragraph>
+        <Button onClick={this.props.onDelete}>Delete</Button>
 
         <Dialog
-          isShown={isShown}
-          onCloseComplete={() => setIsShown(false)}
+          isShown={this.state.isShown}
+          onCloseComplete={() => {
+            this.setState({isShown: false})
+            this.editInputNotes(this.props.id)
+          }}
           hasHeader={false}
           hasFooter={false}
         >
@@ -52,58 +65,75 @@ const NoteCard = props => {
           width="100%"
           name="text-input-name"
           marginBottom={10}
+          value={this.props.notesTitle}
+          onChange={this.props.onNoteChange}
           />
           <Textarea
           width="100%"
           height="100%"
           name="textarea-1"
+          value={this.props.notesNote}
+          onChange={this.props.onNoteChange}
           /> 
           </Pane>
         </Dialog>
       </Card>
     
-  )
+  )}
 }
 
-function App() {
-  const [isShown, setIsShown] = useState(false)
-  const [notes, setNotes] = useState({ title: '', note: '' })
-  const [component, setComponent] = useState([])
-  const [inputNotes, setInputNotes] = useState([])
+class App extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      isShown : false,
+      notes: {title: '', note: ''},
+      component: [],
+      inputNotes:[]
+    }
+    //this.prevInput = this.state.inputNotes
+  }
 
-  const onDelete = (event, id) => {
+   onDelete = (event, id) => {
     if (event.target === event.currentTarget) {
-      const newArr = inputNotes.filter(item => item.id !== id)
-      setInputNotes(newArr)
-      console.log(inputNotes)
+      const newArr = this.state.inputNotes.filter(item => item.id !== id)
+      this.setState({inputNotes: newArr})
+      console.log(this.state.inputNotes)
     }
   }
 
 
-  const prevInput = useRef()
-  useEffect(() => {
-    prevInput.current = inputNotes
-  })
+  // const prevInput - useRef()
+  // useEffect(() => {
+  //   prevInput.current = inputNotes
+  // })
 
-  const onNoteChange = (event) => {
+   onNoteChange = (event) => {
+    
     const { name, value } = event.target
     if (name === 'text-input-name') {
-      setNotes({ ...notes, ...{ title: value } })
+      this.setState((prevState) => {
+        return {notes: {title: value, note: prevState.notes.note}}
+      })
     }
     else if (name === 'textarea-1') {
-      setNotes({ ...notes, ...{ note: value } })
+      this.setState((prevState) => {
+        return {notes: {title: prevState.notes.title, note: value}}
+      })
     }
   }
 
 
-  const createCard = () => {
-    if ((notes.title !== '' || notes.note !== '')) {
-      inputNotes.push({ id: Math.random(), title: notes.title, note: notes.note })
+  createCard = () => {
+    if ((this.state.notes.title !== '' || this.state.notes.note !== '')) {
+      this.state.inputNotes.push({ id: Math.random(), title: this.state.notes.title, note: this.state.notes.note })
     }
-    const newComponents = [...component, NoteCard]
-    setComponent(newComponents)
+    const newComponents = [...this.state.component, NoteCard]
+    this.setState({component: newComponents})
 
   }
+
+ render() {
   return (
     <Pane>
       <Nav />
@@ -114,10 +144,10 @@ function App() {
         display="flex"
       >
         <SideSheet
-          isShown={isShown}
+          isShown={this.state.isShown}
           onCloseComplete={() => {
-            setIsShown(false)
-            createCard()
+            this.setState({isShown: false})
+            this.createCard()
 
           }}
           position={Position.Right}
@@ -130,8 +160,8 @@ function App() {
                 placeholder="Title"
                 height={40}
                 width="100%"
-                onChange={onNoteChange}
-                value={notes.title}
+                onChange={this.onNoteChange}
+                value={this.state.notes.title}
               />
             </Pane>
           </Pane>
@@ -150,8 +180,8 @@ function App() {
                 placeholder="Start Writing.."
                 height="100%"
                 width="100%"
-                onChange={onNoteChange}
-                value={notes.note}
+                onChange={this.onNoteChange}
+                value={this.state.notes.note}
               />
             </Card>
           </Pane>
@@ -160,7 +190,7 @@ function App() {
         <IconButton
           icon="plus"
           iconSize={40}
-          onClick={() => setIsShown(true)}
+          onClick={() => this.setState({isShown: true})}
           padding={10}
           height={300}
           width={150}
@@ -171,16 +201,19 @@ function App() {
           justifyContent="center"
           border="default"
         />
-        {component.map((NoteCard, i) => {
-          if (inputNotes[i] && (inputNotes[i].title !== '' || inputNotes[i].note !== '') &&
-            (inputNotes[i].title !== 'undefined' || inputNotes[i].note !== 'undefined')
+        {this.state.component.map((NoteCard, i) => {
+          if (this.state.inputNotes[i] && (this.state.inputNotes[i].title !== '' || this.state.inputNotes[i].note !== '') &&
+            (this.state.inputNotes[i].title !== 'undefined' || this.state.inputNotes[i].note !== 'undefined')
           ) {
             return (<NoteCard
               key={i}
-              title={inputNotes[i].title}
-              note={inputNotes[i].note}
-              onDelete={(event) => onDelete(event, inputNotes[i].id)}
-              onNoteChange={onNoteChange}
+              title={this.state.inputNotes[i].title}
+              note={this.state.inputNotes[i].note}
+              onDelete={(event) => this.onDelete(event, this.state.inputNotes[i].id)}
+              id={this.state.inputNotes[i].id}
+              onNoteChange={this.onNoteChange}
+              notesTitle={this.state.notes.title}
+              notesNote={this.state.notes.note}
             />)
           }
         }
@@ -188,7 +221,9 @@ function App() {
 
       </CardContainer>
     </Pane>
-  )
+  )}
+
 }
+
 
 export default App;
