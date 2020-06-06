@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from 'react';
+import React from 'react';
 import Nav from './components/Nav'
 import {
   Pane,
@@ -15,6 +15,7 @@ import {
 }
   from 'evergreen-ui'
 import CardContainer from './components/CardContainer';
+
 
 class NoteCard extends React.Component {
     constructor(props) {
@@ -65,18 +66,19 @@ render(){
           width="100%"
           name="text-input-name"
           marginBottom={10}
-          value={this.props.notesTitle}
-          onChange={this.props.onNoteChange}
+          defaultValue={this.props.title}
+          onChange={(e) => this.props.updateTextInput(e.target.value, this.props.id)}
           />
           <Textarea
           width="100%"
           height="100%"
           name="textarea-1"
-          value={this.props.notesNote}
-          onChange={this.props.onNoteChange}
+          value={this.props.note}
+          onChange={(e)=> this.props.updateTextArea(e.target.value, this.props.id)}
           /> 
           </Pane>
         </Dialog>
+
       </Card>
     
   )}
@@ -91,9 +93,9 @@ class App extends React.Component {
       component: [],
       inputNotes:[]
     }
+  this.updateNotes = this.updateNotes
     //this.prevInput = this.state.inputNotes
   }
-
    onDelete = (event, id) => {
     if (event.target === event.currentTarget) {
       const newArr = this.state.inputNotes.filter(item => item.id !== id)
@@ -103,6 +105,23 @@ class App extends React.Component {
   }
 
 
+  updateNotes = (text, id) => {
+   this.setState((state) => {
+     const objIndex = state.inputNotes.findIndex((obj => obj.id === id))
+     state.inputNotes[objIndex].title = text
+     return {inputNotes: state.inputNotes}
+   })
+  }
+
+  updateTextArea = (text, id)  => {
+    this.setState((state) => {
+      const objIndex = state.inputNotes.findIndex((obj => obj.id === id))
+      state.inputNotes[objIndex].note = text
+      return {inputNotes: state.inputNotes}
+    })
+  }
+     
+   
   // const prevInput - useRef()
   // useEffect(() => {
   //   prevInput.current = inputNotes
@@ -122,7 +141,7 @@ class App extends React.Component {
       })
     }
   }
-
+  
 
   createCard = () => {
     if ((this.state.notes.title !== '' || this.state.notes.note !== '')) {
@@ -205,6 +224,7 @@ class App extends React.Component {
           if (this.state.inputNotes[i] && (this.state.inputNotes[i].title !== '' || this.state.inputNotes[i].note !== '') &&
             (this.state.inputNotes[i].title !== 'undefined' || this.state.inputNotes[i].note !== 'undefined')
           ) {
+
             return (<NoteCard
               key={i}
               title={this.state.inputNotes[i].title}
@@ -212,9 +232,10 @@ class App extends React.Component {
               onDelete={(event) => this.onDelete(event, this.state.inputNotes[i].id)}
               id={this.state.inputNotes[i].id}
               onNoteChange={this.onNoteChange}
-              notesTitle={this.state.notes.title}
-              notesNote={this.state.notes.note}
+              updateTextInput={this.updateNotes}
+              updateTextArea={this.updateTextArea}
             />)
+          
           }
         }
         )}
