@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
-
+import Blue from '@material-ui/core/colors/blue'
 
 
 const useStyles = makeStyles({
@@ -80,6 +80,7 @@ export default function NoteCard(props) {
                 <DialogActions>
                     <Button
                         onClick={handleClose}
+                        style={{color: Blue[500]}}
                     >Close</Button>
 
                 </DialogActions>

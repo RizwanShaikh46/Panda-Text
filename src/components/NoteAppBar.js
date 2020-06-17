@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Box from '@material-ui/core/Box'
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import Blue from '@material-ui/core/colors/blue'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
             Notes
           </Typography>
           <IconButton className={classes.iconButton}>
-          <AddCircleIcon style={{color: '#68BB59',fontSize: 50}} />
+          <AddCircleIcon style={{color: Blue[500] ,fontSize: 55}} />
           </IconButton>
           </Box>
         </Toolbar>
